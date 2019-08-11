@@ -88,13 +88,5 @@ clipped_preds = np.clip(preds, 0.05, 0.95)
 df_sample_sub.Pred = clipped_preds
 # print(df_sample_sub.head())
 
-# Make pseudo-random prediction giving 64% probability to team with lower teamID when original model prediction is
-# between 77% and 23%
-
-# df_sample_sub['Pred'] = np.where(df_sample_sub['Pred'] > 0.23, 0.64, df_sample_sub['Pred'])
-# df_sample_sub['Pred'].loc[:, (df_sample_sub['Pred'] >= 0.23) & (df_sample_sub['Pred'] < 0.77)] = 0.64
-df_sample_sub['Pred'].mask(df_sample_sub['Pred'].between(0.23, 0.77), other=0.36, inplace=True)
-# print(df_sample_sub)
-
 # Creates submission file
 df_sample_sub.to_csv('2019_Predicitions_logreg_v3.csv', index=False)
