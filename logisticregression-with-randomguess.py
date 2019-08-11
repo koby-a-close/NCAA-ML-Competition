@@ -1,0 +1,100 @@
+# Google Starter Kernel
+# Taken from Kaggle.com and editted by KAC
+# Last edit: 08/10/2019
+
+# Load packages for Logistic Regression
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+from sklearn.linear_model import LogisticRegression
+import matplotlib.pyplot as plt
+from sklearn.utils import shuffle
+from sklearn.model_selection import GridSearchCV
+
+# Import Data
+from subprocess import check_output
+# print(check_output(["ls", "../input"]).decode("utf8"))
+data_dir = '../input/'
+df_seeds = pd.read_csv(data_dir + 'datafiles/NCAATourneySeeds.csv')
+df_tour = pd.read_csv(data_dir + 'datafiles/NCAATourneyCompactResults.csv')
+
+# Gets seed values as integer and adds them to df_seeds
+def seed_to_int(seed):
+    #Get just the digits from the seeding. Return as int
+    s_int = int(seed[1:3])
+    return s_int
+df_seeds['seed_int'] = df_seeds.Seed.apply(seed_to_int)
+
+# Drops unneeded columns of data from df_seeds and df_tour
+df_seeds.drop(labels=['Seed'], inplace=True, axis=1)
+df_tour.drop(labels=['DayNum', 'WScore', 'LScore', 'WLoc', 'NumOT'], inplace=True, axis=1)
+
+# Merge seeds with winning team ID
+df_winseeds = df_seeds.rename(columns={'TeamID':'WTeamID', 'seed_int':'WSeed'}) # Copy of ID and seed to use for winners
+df_lossseeds = df_seeds.rename(columns={'TeamID':'LTeamID', 'seed_int':'LSeed'}) # Copy of ID and see to use for losers
+df_dummy = pd.merge(left=df_tour, right=df_winseeds, how='left', on=['Season', 'WTeamID']) # Combines df_tour and df_winseeds using WTeamID, adds WSeed
+df_concat = pd.merge(left=df_dummy, right=df_lossseeds, on=['Season', 'LTeamID']) # Combines df_dummy and df_lossseeds using LTeamID, adds LSeed
+df_concat['SeedDiff'] = df_concat.WSeed - df_concat.LSeed # Adds column and calculates seed differences
+
+# Creates a dataframe that summarizes wins and losses & seed differences
+df_wins = pd.DataFrame()
+df_wins['SeedDiff'] = df_concat['SeedDiff']
+df_wins['Result'] = 1
+
+df_losses = pd.DataFrame()
+df_losses['SeedDiff'] = -df_concat['SeedDiff']
+df_losses['Result'] = 0
+df_predictions = pd.concat((df_wins, df_losses))
+
+X_train = df_predictions.SeedDiff.values.reshape(-1,1)
+y_train = df_predictions.Result.values
+X_train, y_train = shuffle(X_train, y_train)
+
+# Creates logistic regression model with different values of C
+logreg = LogisticRegression()
+params = {'C': np.logspace(start=-5, stop=3, num=9)}
+clf = GridSearchCV(logreg, params, scoring='neg_log_loss', refit=True)
+clf.fit(X_train, y_train)
+print('Best log_loss: {:.4}, with best C: {}'.format(clf.best_score_, clf.best_params_['C']))
+
+# Plot of model
+X = np.arange(-10, 10).reshape(-1, 1)
+preds = clf.predict_proba(X)[:,1]
+
+plt.plot(X, preds)
+plt.xlabel('Team1 seed - Team2 seed')
+plt.ylabel('P(Team1 will win)')
+# plt.show()
+
+# Creating X-text for the model to make predictions with
+df_sample_sub = pd.read_csv(data_dir + 'SampleSubmissionStage2.csv')
+n_test_games = len(df_sample_sub)
+
+def get_year_t1_t2(ID):
+    """Return a tuple with ints `year`, `team1` and `team2`."""
+    return (int(x) for x in ID.split('_'))
+
+X_test = np.zeros(shape=(n_test_games, 1))
+for ii, row in df_sample_sub.iterrows():
+    year, t1, t2 = get_year_t1_t2(row.ID)
+    t1_seed = df_seeds[(df_seeds.TeamID == t1) & (df_seeds.Season == year)].seed_int.values[0]
+    t2_seed = df_seeds[(df_seeds.TeamID == t2) & (df_seeds.Season == year)].seed_int.values[0]
+    diff_seed = t1_seed - t2_seed
+    X_test[ii, 0] = diff_seed
+
+# Makes predictions using model
+preds = clf.predict_proba(X_test)[:, 1]
+
+clipped_preds = np.clip(preds, 0.05, 0.95)
+df_sample_sub.Pred = clipped_preds
+# print(df_sample_sub.head())
+
+# This section replaces any prediciton with low certainty (between 0.23 and 0.77) with a guess of 0.64 to either the
+# lower team ID (0.64) or to the higher teamID (0.34)
+# NEED TO PICK ONE OR THE OTHER
+# Lower teamID will win
+#df_sample_sub['Pred'].mask(df_sample_sub['Pred'].between(0.23, 0.77), other=0.64, inplace=True)
+# Higher teamID will win
+df_sample_sub['Pred'].mask(df_sample_sub['Pred'].between(0.23, 0.77), other=0.36, inplace=True)
+
+# Creates submission file
+df_sample_sub.to_csv('2019_Predicitions_logreg_v3.csv', index=False)
