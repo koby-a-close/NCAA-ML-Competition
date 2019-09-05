@@ -25,8 +25,7 @@ Models Built:
 -Google Starter Kernel with random guessing strategy, file: Google_Starter_Kernel.py 
 -Logistic Regression using Winning Percentage, file: LogReg_WinPerc.py
 -Decision Tree using Wins, Losses, Win %, Points per Game (PPG), Points Against per Game (PAPG), Wins in Close Games, Losses          in Close Games, Win % in Close Games, file: NCAA_DecTree.py
--XGBoost Model, file: NCAA_xgboost.py
+-XGBoost Ensemble Model, file: NCAA_xgboost.py
 
 Results:
-My best log loss score was ____ from the ____ model. It's record was ___. However, it relied on guessing.
-My best log loss score with a model only was ___ from the ___ model. It's record was ___. I met both of my goals.
+My best log loss score was 0.48970 from the Google Starter Kernel with Guessing Strategy model and it would have placed 304th. It's record was 47-19. However, it relied on guessing. My best log loss score with a model only was 0.50034 from the XGBoost model and it would have placed 420th. It's record was 44-22. I met both of my goals.
