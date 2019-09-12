@@ -15,23 +15,24 @@ simplefilter(action='ignore', category=FutureWarning)
 
 # Load packages
 
-from numpy import loadtxt
-from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from numpy import loadtxt
+# from numpy import loadtxt
+# from xgboost import XGBClassifier
+# from sklearn.model_selection import train_test_split
+# from sklearn.metrics import accuracy_score
+
+
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
-from sklearn import tree
+# from sklearn import tree
 from sklearn.model_selection import cross_val_score
 from sklearn.utils import shuffle
-from sklearn.externals.six import StringIO
-from IPython.display import Image
-from sklearn.tree import export_graphviz
-import pydotplus
+# from sklearn.externals.six import StringIO
+# from IPython.display import Image
+# from sklearn.tree import export_graphviz
+# import pydotplus
 
 # Import Data
 data_dir = '/Users/Koby/PycharmProjects/NCAACompetition/Input/'
