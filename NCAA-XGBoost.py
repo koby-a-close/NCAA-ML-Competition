@@ -14,32 +14,18 @@ from warnings import simplefilter
 simplefilter(action='ignore', category=FutureWarning)
 
 # Load packages
-
-# from numpy import loadtxt
-# from xgboost import XGBClassifier
-# from sklearn.model_selection import train_test_split
-# from sklearn.metrics import accuracy_score
-
-
+import numpy as np
+import pandas as pd
 from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import accuracy_score
-import numpy as np  # linear algebra
-import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
-# from sklearn import tree
-from sklearn.model_selection import cross_val_score
 from sklearn.utils import shuffle
-# from sklearn.externals.six import StringIO
-# from IPython.display import Image
-# from sklearn.tree import export_graphviz
-# import pydotplus
 
 # Import Data
 data_dir = '/Users/Koby/PycharmProjects/NCAACompetition/Input/'
 df_seeds = pd.read_csv(data_dir + 'DataFiles/NCAATourneySeeds.csv')
 df_tour = pd.read_csv(data_dir + 'DataFiles/NCAATourneyCompactResults.csv')
 df_regseason = pd.read_csv(data_dir + 'DataFiles/RegularSeasonCompactResults.csv')
-
 
 # Get all data from the 'Regular Season Compact Results' file and add it to the df_basedata dataframe
 # Record calculations:
@@ -65,7 +51,6 @@ df_basedata = pd.merge(left=df_basedata, right=df_ppg, how='left', on=['Season',
 df_basedata.PPG.fillna(0, inplace=True)
 del df_temp
 del df_temp2
-del df_ppg
 # PAPG calculations:
 df_papg = pd.DataFrame(df_regseason.groupby(['Season', 'WTeamID'])['LScore'].sum().reset_index())
 df_papg.rename(columns={df_papg.columns[1]: 'TeamID', df_papg.columns[2]: 'WPointsAgainst'}, inplace=True)
@@ -79,7 +64,6 @@ df_papg.drop(labels=['WPointsAgainst', 'LPointsAgainst', 'Points_Against'], inpl
 df_basedata = pd.merge(left=df_basedata, right=df_papg, how='left', on=['Season', 'TeamID'])
 df_basedata.PAPG.fillna(0, inplace=True)
 del df_temp2
-del df_papg
 # Close Games Record Calculations:
 df_regseason['score_diff'] = df_regseason.WScore - df_regseason.LScore
 df_regseason_close = pd.DataFrame(df_regseason.loc[df_regseason['score_diff'] <= 10])
@@ -96,9 +80,7 @@ df_basedata.Close_Wins.fillna(0, inplace=True)
 df_basedata.Close_Losses.fillna(0, inplace=True)
 df_basedata['Close_Win_Perc'] = df_basedata.Close_Wins / (df_basedata.Close_Wins + df_basedata.Close_Losses)
 df_basedata.Close_Win_Perc.fillna(0, inplace=True)
-del df_close_record
-del df_regseason_close
-del df_temp
+
 
 # Check to see if there are any empty values
 # idx, idy = np.where(pd.isnull(df_basedata))
