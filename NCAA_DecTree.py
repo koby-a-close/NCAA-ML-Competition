@@ -14,8 +14,8 @@ from warnings import simplefilter
 simplefilter(action='ignore', category=FutureWarning)
 
 # Load packages for Logistic Regression
-import numpy as np  # linear algebra
-import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
+import numpy as np
+import pandas as pd
 from sklearn import tree
 from sklearn.model_selection import cross_val_score
 from sklearn.utils import shuffle
