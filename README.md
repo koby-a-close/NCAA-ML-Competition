@@ -1,8 +1,4 @@
 # NCAA-ML-Competition
-
-Personal Background:
-I am a Biomedical Engineer seeking an opportunity as a Data/Business Analyst. This was my first Kaggle competition as I look to showcase my skills analyzing data. My professional experience has been based around collecting high quality data for product development projects, using that data for analysis of project goals, and presenting updates and findings. In my education and career I have used mostly Matlab and Excel. Since starting this transition in July 2019 I have taken up Python, SQL, and Qlik for data visualization.
-
 Project Background and Goals:
 This project is hosted by Google and the NCAA. The data provided by Google includes regular season and tournament data from 1984 on.
 
